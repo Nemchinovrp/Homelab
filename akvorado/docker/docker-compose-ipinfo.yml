@@ -1,0 +1,15 @@
+---
+services:
+  geoip:
+    extends:
+      file: versions.yml
+      service: ipinfo-geoipupdate
+    environment:
+      - IPINFO_TOKEN=a2632ea59736c7
+      - IPINFO_DATABASES=country asn
+      - UPDATE_FREQUENCY=48h
+    volumes:
+      - akvorado-geoip:/data
+    healthcheck:
+      interval: 20s
+      test: ["CMD", "test", "-f", "/tmp/healthy"]

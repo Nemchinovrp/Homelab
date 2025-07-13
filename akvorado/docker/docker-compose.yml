@@ -1,0 +1,194 @@
+---
+volumes:
+  akvorado-zookeeper:
+  akvorado-kafka:
+  akvorado-geoip:
+  akvorado-clickhouse:
+  akvorado-run:
+  akvorado-console-db:
+
+services:
+  zookeeper:
+    extends:
+      file: versions.yml
+      service: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_ENABLE_PROMETHEUS_METRICS=yes
+      - ZOO_4LW_COMMANDS_WHITELIST=srvr,mntr,ruok
+    restart: unless-stopped
+    expose:
+      - 2181/tcp
+      - 2888/tcp
+      - 3888/tcp
+      - 7000/tcp                # Prometheus metrics
+    volumes:
+      - akvorado-zookeeper:/bitnami/zookeeper
+    healthcheck:
+      interval: 20s
+      test: ["CMD-SHELL", "echo ruok | nc -w3 127.0.0.1 2181 | grep -xFq imok"]
+
+  kafka:
+    extends:
+      file: versions.yml
+      service: kafka
+    environment:
+      - KAFKA_ZOOKEEPER_PROTOCOL=PLAINTEXT
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - JMX_PORT=5555
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - akvorado-kafka:/bitnami/kafka
+    healthcheck:
+      interval: 20s
+      test: ["CMD", "env", "-u", "JMX_PORT", "kafka-topics.sh", "--list", "--bootstrap-server", "kafka:9092"]
+
+  redis:
+    extends:
+      file: versions.yml
+      service: redis
+    restart: unless-stopped
+    healthcheck:
+      interval: 20s
+      test: ["CMD-SHELL", "timeout 3 redis-cli ping | grep -q PONG"]
+
+  akvorado-orchestrator:
+    extends:
+      file: versions.yml
+      service: akvorado
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command: orchestrator /etc/akvorado/akvorado.yaml
+    volumes:
+      - ../config:/etc/akvorado:ro
+      - akvorado-geoip:/usr/share/GeoIP:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.akvorado-orchestrator.entrypoints=private
+      - traefik.http.routers.akvorado-orchestrator.rule=PathPrefix(`/api/v0/orchestrator`)
+      - traefik.http.services.akvorado-orchestrator.loadbalancer.server.port=8080
+  akvorado-console:
+    extends:
+      file: versions.yml
+      service: akvorado
+    restart: unless-stopped
+    depends_on:
+      akvorado-orchestrator:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    command: console http://akvorado-orchestrator:8080
+    volumes:
+      - akvorado-console-db:/run/akvorado
+    environment:
+      - AKVORADO_CFG_CONSOLE_DATABASE_DSN=/run/akvorado/console.sqlite
+    labels:
+      - traefik.enable=true
+      # Only expose /debug endpoint on the private entrypoint.
+      - traefik.http.routers.akvorado-console-debug.rule=PathPrefix(`/debug`)
+      - traefik.http.routers.akvorado-console-debug.entrypoints=private
+      - traefik.http.routers.akvorado-console-debug.service=akvorado-console
+      # For anything else...
+      - "traefik.http.routers.akvorado-console.rule=!PathPrefix(`/debug`)"
+      - traefik.http.routers.akvorado-console.middlewares=console-auth-headers
+      - traefik.http.services.akvorado-console.loadbalancer.server.port=8080
+      - traefik.http.middlewares.console-auth-headers.headers.customrequestheaders.Remote-User=alfred
+      - traefik.http.middlewares.console-auth-headers.headers.customrequestheaders.Remote-Name=Alfred Pennyworth
+      - traefik.http.middlewares.console-auth-headers.headers.customrequestheaders.Remote-Email=alfred@example.com
+  akvorado-inlet:
+    extends:
+      file: versions.yml
+      service: akvorado
+    ports:
+      - 2055:2055/udp
+      - 6343:6343/udp
+      - 10179:10179/tcp
+    restart: unless-stopped
+    depends_on:
+      akvorado-orchestrator:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    command: inlet http://akvorado-orchestrator:8080
+    volumes:
+      - akvorado-run:/run/akvorado
+    environment:
+      - AKVORADO_CFG_INLET_METADATA_CACHEPERSISTFILE=/run/akvorado/metadata.cache
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.akvorado-inlet.entrypoints=private
+      - traefik.http.routers.akvorado-inlet.rule=PathPrefix(`/api/v0/inlet`)
+      - traefik.http.services.akvorado-inlet.loadbalancer.server.port=8080
+      - akvorado.conntrack.fix=true
+  akvorado-conntrack-fixer:
+    extends:
+      file: versions.yml
+      service: akvorado
+    cap_add:
+      - NET_ADMIN
+    command: conntrack-fixer
+    restart: unless-stopped
+    network_mode: host
+    healthcheck:
+      disable: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  clickhouse:
+    extends:
+      file: versions.yml
+      service: clickhouse
+    volumes:
+      - ../orchestrator/clickhouse/data/docker-entrypoint.sh:/entrypoint-override.sh:ro
+      - akvorado-clickhouse:/var/lib/clickhouse
+    entrypoint: /entrypoint-override.sh
+    environment:
+      - CLICKHOUSE_INIT_TIMEOUT=60
+      - CLICKHOUSE_SKIP_USER_SETUP=1
+    cap_add:
+      - SYS_NICE
+    restart: unless-stopped
+    healthcheck:
+      interval: 20s
+      test: ["CMD", "wget", "-T", "1", "--spider", "--no-proxy", "http://127.0.0.1:8123/ping"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.clickhouse.entrypoints=private
+      - traefik.http.routers.clickhouse.rule=PathPrefix(`/clickhouse`)
+      - traefik.http.routers.clickhouse.middlewares=clickhouse-strip
+      - traefik.http.middlewares.clickhouse-strip.stripprefix.prefixes=/clickhouse
+      - traefik.http.services.clickhouse.loadbalancer.server.port=8123
+
+  traefik:
+    extends:
+      file: versions.yml
+      service: traefik
+    restart: unless-stopped
+    command:
+      - --api=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.private.address=:8080
+      - --entrypoints.public.address=:8081
+    ports:
+      # Port 8080 is considered private as it exposes sensible unauthenticated
+      # services (ClickHouse, configuration, ...). Therefore, it is only exposed
+      # on the loopback. Port 8081 is the one you can expose to users. If you
+      # want to change these ports, leave "8080/tcp" and "8081/tcp" unchanged:
+      # you can modify the IP/port on the left.
+      - 127.0.0.1:8080:8080/tcp
+      - 8081:8081/tcp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
