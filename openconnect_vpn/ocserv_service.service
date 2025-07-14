@@ -1,0 +1,10 @@
+[Unit]
+After=network.target
+[Service]
+WorkingDirectory=/home/roman/ocserv/src
+Type=simple
+ExecStart=/home/roman/ocserv/src/ocserv -d 4 -f -c /home/roman/ocserv/src/sample.config
+ExecStop=/bin/kill $(cat /run/ocserv.pid)
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target

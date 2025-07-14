@@ -1,0 +1,10 @@
+[Unit]
+After=network.target
+[Service]
+WorkingDirectory=/home/debian/ocserv/src
+Type=simple
+ExecStart=/home/debian/ocserv/src/ocserv -d 9 -f -c /home/debian/ocserv/src/sample.config
+ExecStop=/bin/kill $(cat /run/ocserv.pid)
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
