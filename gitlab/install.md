@@ -76,3 +76,6 @@ gitlab_net:
 
 Убить все: laugh
 # docker-compose stop && docker-compose rm -f 
+
+
+Password: l4h+XMdFQ/AVBIv4Si9wsYQHTbB0CjXYsykUrcMxCgI=

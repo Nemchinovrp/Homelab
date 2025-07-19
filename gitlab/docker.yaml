@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest  # или gitlab/gitlab-ee для Enterprise
+    container_name: gitlab
+    restart: always
+    hostname: 192.168.1.103  # замените на ваш домен или IP
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.example.com'  # внешний URL
+        # Дополнительные настройки (SMTP, LDAP и т. д.)
+    ports:
+      - "80:80"         # HTTP
+      - "443:443"       # HTTPS
+      - "2222:22"       # SSH (если стандартный 22 занят)
+    volumes:
+      - ./gitlab/config:/etc/gitlab   # конфиги
+      - ./gitlab/logs:/var/log/gitlab # логи
+      - ./gitlab/data:/var/opt/gitlab # данные

@@ -2,7 +2,7 @@ version: '3.5'
 services:
   gitlab:
     image: gitlab/gitlab-ce:latest
-    hostname: 10.106.65.24
+    hostname: 192.168.1.103
     restart: unless-stopped
     environment:
       GITLAB_OMNIBUS_CONFIG: |
