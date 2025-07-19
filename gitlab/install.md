@@ -79,3 +79,5 @@ gitlab_net:
 
 
 Password: l4h+XMdFQ/AVBIv4Si9wsYQHTbB0CjXYsykUrcMxCgI=
+
+docker exec -it gitlab /bin/bash
