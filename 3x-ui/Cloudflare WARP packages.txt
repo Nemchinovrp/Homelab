@@ -11,6 +11,7 @@ The supported releases are:
 Older builds exist for:
 •	Bionic (18.04)
 •	Xenial (16.04)
+
 # Add cloudflare gpg key
 curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
 
@@ -21,7 +22,9 @@ echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] ht
 
 # Install
 sudo apt-get update && sudo apt-get install cloudflare-warp
-		
+
+
+---------------------------------
 Debian
 The supported releases are:
 •	Bookworm (12)
@@ -39,17 +42,15 @@ echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] ht
 
 # Install
 sudo apt-get update && sudo apt-get install cloudflare-warp
-		
-Red Hat Enterprise Linux & CentOS
-Install the repository with yum (replace <VERSION> with the release version number):
-The supported versions are:
-•	8
-# Add cloudflare-warp.repo to /etc/yum.repos.d/
-curl -fsSl https://pkg.cloudflareclient.com/cloudflare-warp-ascii.repo | sudo tee /etc/yum.repos.d/cloudflare-warp.repo
 
-# Update repo
-sudo yum update
 
-# Install
-sudo yum install cloudflare-warp
+-------------------------------------
 		
+warp-cli registration new
+warp-cli mode proxy
+warp-cli connect
+
+проверка запуска прокси warp
+netstat -tulnp
+
+curl --proxy socks5h://127.0.0.1:4000 https://ifconfig.me
