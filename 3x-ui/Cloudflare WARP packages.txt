@@ -53,4 +53,4 @@ warp-cli connect
 проверка запуска прокси warp
 netstat -tulnp
 
-curl --proxy socks5h://127.0.0.1:4000 https://ifconfig.me
+curl --proxy socks5h://127.0.0.1:40000 https://ifconfig.me
