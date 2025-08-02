@@ -8,3 +8,5 @@ opkg install xray
 
 
 путь до конфига /etc/xray/config.json
+
+и создать sock5 проксю 192.168.1.1:1080 
