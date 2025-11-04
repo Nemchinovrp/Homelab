@@ -1,0 +1,34 @@
+# Sample localization for English language.
+# Keys correspond to constants defined in app/localization/texts.py.
+WELCOME: |
+  Welcome to Remnawave Bedolaga Bot!
+  Update this text to greet users in your own style.
+
+MENU:
+  BALANCE: "Balance"
+  SERVER_STATUS: "Server status"
+  SUBSCRIPTION: "Subscription"
+
+SERVER_STATUS:
+  TITLE: "📊 <b>Server status</b>"
+  SUMMARY: "Total servers: {total} (online: {online}, offline: {offline})"
+  AVAILABLE: "✅ <b>Online</b>"
+  UNAVAILABLE: "❌ <b>Offline</b>"
+  LATENCY: "{latency} ms"
+  LATENCY_UNKNOWN: "no data"
+  OFFLINE: "no response"
+  NO_SERVERS: "No server data available."
+  PAGINATION: "Page {current} of {total}"
+  PREV_PAGE: "⬅️ Back"
+  NEXT_PAGE: "Next ➡️"
+  REFRESH: "🔄 Refresh"
+  ERROR_SHORT: "Failed to fetch data"
+  NOT_CONFIGURED: "Feature is not available."
+  UPDATED_AT: "⏱ Updated at: {time}"
+
+RULES_TEXT: |
+  Remnawave service rules:
+    1. Follow the law of your jurisdiction.
+    2. Do not distribute spam or malicious content.
+    3. Respect other community members.
+

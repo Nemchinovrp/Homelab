@@ -1,0 +1,34 @@
+# Пример локализации на русском языке.
+# Ключи соответствуют именам констант из app/localization/texts.py.
+WELCOME: |
+  Добро пожаловать в Remnawave Bedolaga Bot!
+  Эти строки заменят стандартное приветствие бота.
+
+MENU:
+  BALANCE: "Баланс"
+  SERVER_STATUS: "Статус серверов"
+  SUBSCRIPTION: "Подписка"
+
+SERVER_STATUS:
+  TITLE: "📊 <b>Статус серверов</b>"
+  SUMMARY: "Всего серверов: {total} (в сети: {online}, вне сети: {offline})"
+  AVAILABLE: "✅ <b>Доступны</b>"
+  UNAVAILABLE: "❌ <b>Недоступны</b>"
+  LATENCY: "{latency} мс"
+  LATENCY_UNKNOWN: "нет данных"
+  OFFLINE: "нет ответа"
+  NO_SERVERS: "Нет данных о серверах."
+  PAGINATION: "Страница {current} из {total}"
+  PREV_PAGE: "⬅️ Назад"
+  NEXT_PAGE: "Вперед ➡️"
+  REFRESH: "🔄 Обновить"
+  ERROR_SHORT: "Не удалось получить данные"
+  NOT_CONFIGURED: "Функция недоступна."
+  UPDATED_AT: "⏱ Обновлено: {time}"
+
+RULES_TEXT: |
+  Правила сервиса Remnawave:
+    1. Следуйте законам своей страны.
+    2. Не распространяйте спам и вредоносный контент.
+    3. Уважайте других пользователей.
+
