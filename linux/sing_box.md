@@ -63,3 +63,13 @@ sudo systemctl status sing-box
 
 # Просмотр логов
 sudo journalctl -u sing-box -f
+
+------------------------------
+# Проверка открытых портов
+netstat -tlnp | grep sing-box
+
+# Тестирование SOCKS5 прокси
+curl --socks5 127.0.0.1:1080 https://httpbin.org/ip
+
+# Тестирование HTTP прокси
+curl --proxy http://127.0.0.1:8080 https://httpbin.org/ip
