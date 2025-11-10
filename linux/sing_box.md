@@ -27,3 +27,39 @@ sudo systemctl status sing-box
 # Если сервис не создан автоматически, создайте его:
 sudo nano /etc/systemd/system/sing-box.service
 
+------------------------------------------------------
+[Unit]
+Description=sing-box service
+Documentation=https://sing-box.sagernet.org
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/sing-box run -c /etc/sing-box/config.json
+Restart=on-failure
+RestartSec=3
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+------------------------------------------------------
+
+
+# Проверка конфигурации
+sudo sing-box check -c /etc/sing-box/config.json
+
+# Перезагрузка systemd
+sudo systemctl daemon-reload
+
+# Включение автозапуска
+sudo systemctl enable sing-box
+
+# Запуск сервиса
+sudo systemctl start sing-box
+
+# Проверка статуса
+sudo systemctl status sing-box
+
+# Просмотр логов
+sudo journalctl -u sing-box -f
