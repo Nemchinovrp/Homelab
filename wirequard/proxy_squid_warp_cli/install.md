@@ -41,3 +41,13 @@ wg genkey | tee client1_private.key | wg pubkey > client1_public.key
 Делаем исполняемым и запускаем:
 sudo chmod +x /etc/wireguard/setup-squid-routing.sh
 sudo /etc/wireguard/setup-squid-routing.sh
+
+
+Конфигурация клиента WireGuard
+/etc/wireguard/client.conf:
+
+Запуск и управление сервисами
+Создаем systemd сервис для управления:
+/etc/systemd/system/wg-squid.service:
+
+Включаем автозапуск:
