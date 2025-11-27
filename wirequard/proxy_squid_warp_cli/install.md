@@ -51,3 +51,11 @@ sudo /etc/wireguard/setup-squid-routing.sh
 /etc/systemd/system/wg-squid.service:
 
 Включаем автозапуск:
+
+sudo systemctl daemon-reload
+sudo systemctl enable wg-squid
+sudo systemctl enable warp-svc
+
+# Запускаем
+sudo systemctl start warp-svc
+sudo systemctl start wg-squid
