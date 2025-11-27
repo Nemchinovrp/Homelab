@@ -36,6 +36,9 @@ umask 077
 wg genkey | tee server_private.key | wg pubkey > server_public.key
 wg genkey | tee client1_private.key | wg pubkey > client1_public.key
 
+# Конфиг WireGuard сервера:
+/etc/wireguard/wg0.conf:
+
 # Скрипт настройки iptables
 /etc/wireguard/setup-squid-routing.sh:
 
