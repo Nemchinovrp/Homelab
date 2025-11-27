@@ -59,3 +59,22 @@ sudo systemctl enable warp-svc
 # Запускаем
 sudo systemctl start warp-svc
 sudo systemctl start wg-squid
+
+# Расширенная конфигурация Squid
+Для лучшего контроля создаем дополнительные ACL:
+/etc/squid/conf.d/acl.conf:
+
+Создаем списки доменов:
+
+# Рекламные домены
+sudo mkdir -p /etc/squid
+curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | \
+grep '^0.0.0.0' | awk '{print $2}' | \
+sudo tee /etc/squid/ads.domains
+
+# Домены без WARP (пример)
+echo -e "google.com\nyoutube.com\ngithub.com" | sudo tee /etc/squid/nowarp.domains
+
+Мониторинг и логи
+Настройка расширенного логирования:
+/etc/squid/conf.d/logging.conf:
