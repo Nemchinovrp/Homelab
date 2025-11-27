@@ -75,6 +75,52 @@ sudo tee /etc/squid/ads.domains
 # Домены без WARP (пример)
 echo -e "google.com\nyoutube.com\ngithub.com" | sudo tee /etc/squid/nowarp.domains
 
-Мониторинг и логи
+# Мониторинг и логи
 Настройка расширенного логирования:
 /etc/squid/conf.d/logging.conf:
+
+# Скрипт мониторинга:
+/usr/local/bin/monitor-squid-warp.sh:
+
+Добавляем в cron:
+
+echo "*/3 * * * * root /usr/local/bin/monitor-squid-warp.sh" | sudo tee /etc/cron.d/squid-warp-monitor
+sudo chmod +x /usr/local/bin/monitor-squid-warp.sh
+
+# Тестирование работы
+## На сервере проверяем:
+
+# Статус сервисов
+sudo systemctl status squid warp-svc wg-quick@wg0
+
+# Прослушиваемые порты
+sudo netstat -tulpn | grep -E '(3128|40000|51820)'
+
+# Логи Squid
+sudo tail -f /var/log/squid/access.log
+
+# Логи WireGuard
+sudo wg show
+
+
+## На клиенте:
+# Подключаемся к WireGuard
+sudo wg-quick up client.conf
+
+# Проверяем IP (должен быть Cloudflare)
+curl -s ifconfig.me
+
+# Тестируем прокси
+curl -s --proxy http://10.0.0.1:3128 ifconfig.me
+
+# Проверяем DNS
+nslookup google.com
+
+
+
+
+
+
+Оптимизация производительности
+/etc/squid/conf.d/performance.conf:
+
