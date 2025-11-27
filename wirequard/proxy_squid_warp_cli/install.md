@@ -1,6 +1,7 @@
 # Установка Squid:
 sudo apt update
 sudo apt install squid apache2-utils
+sudo apt install wireguard iptables-persistent netfilter-persistent
 
 # Резервное копирование оригинального конфига:
 sudo cp /etc/squid/squid.conf /etc/squid/squid.conf.backup
