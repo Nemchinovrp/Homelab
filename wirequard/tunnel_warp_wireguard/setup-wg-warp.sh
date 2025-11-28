@@ -12,17 +12,17 @@ HOST_GW="10.200.200.1"
 echo "[*] Проверка root..."
 [ "$EUID" -ne 0 ] && { echo "Запустите от root"; exit 1; }
 
-# === 1. Установка warp-cli по официальному гайду Cloudflare (2025) ===
+# === 1. Установка Cloudflare WARP (официальный способ 2025) ===
 if ! command -v warp-cli &> /dev/null; then
     echo "[*] Установка Cloudflare WARP..."
 
-    # Удаляем старые артефакты (на всякий случай)
+    # Удаляем старый ключ и репозиторий (на всякий случай)
     rm -f /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
     rm -f /etc/apt/sources.list.d/cloudflare-client.list
 
-    # Добавляем GPG-ключ (официальный способ 2025)
+    # Добавляем GPG-ключ (с --yes, как требуется в 2025)
     curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | \
-        gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+        gpg --yes --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
 
     # Добавляем репозиторий
     echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | \
@@ -33,47 +33,37 @@ if ! command -v warp-cli &> /dev/null; then
     apt-get install -y cloudflare-warp
 fi
 
-# === 2. Очистка старого namespace (если существует) ===
+# === 2. Очистка старых компонентов ===
 ip netns del "$WARP_NS" 2>/dev/null || true
 ip link delete "$VETH_HOST" 2>/dev/null || true
+rm -rf /var/lib/cloudflare-warp/ 2>/dev/null || true
 
 # === 3. Создание veth-пары и network namespace ===
-echo "[*] Создание network namespace '$WARP_NS'..."
+echo "[*] Создание network namespace и veth-пары..."
 ip link add "$VETH_HOST" type veth peer name "$VETH_NS"
 ip link set "$VETH_HOST" up
 ip addr add "$HOST_GW/24" dev "$VETH_HOST"
 
+ip netns add "$WARP_NS"
 ip link set "$VETH_NS" netns "$WARP_NS"
+
 ip netns exec "$WARP_NS" ip addr add "$WARP_GW/24" dev "$VETH_NS"
 ip netns exec "$WARP_NS" ip link set "$VETH_NS" up
 ip netns exec "$WARP_NS" ip link set lo up
 
 # === 4. Настройка маршрутизации на хосте ===
-echo "[*] Настройка IP forwarding и правил iptables..."
 sysctl -w net.ipv4.ip_forward=1
-
-# Правило NAT будет добавлено через wg0.conf (PostUp), поэтому здесь только включение forward
 iptables -I FORWARD -i "$VETH_HOST" -j ACCEPT
 iptables -I FORWARD -o "$VETH_HOST" -j ACCEPT
 
-# === 5. Запуск warp-svc в namespace ===
-echo "[*] Запуск WARP в namespace..."
-ip netns exec "$WARP_NS" warp-svc &
+# === 5. Регистрация WARP ВНУТРИ namespace (автоматически принимает ToS) ===
+if ! ip netns exec "$WARP_NS" warp-cli status &>/dev/null || \
+   ! ip netns exec "$WARP_NS" warp-cli status | grep -q "Registered"; then
 
-# Ждём, пока сервис стартует
-sleep 5
-
-# Проверяем статус
-if ! ip netns exec "$WARP_NS" warp-cli status &>/dev/null; then
-    echo "[!] Не удалось запустить warp-cli в namespace."
-    exit 1
-fi
-
-# Регистрация (если нужно)
-if ! ip netns exec "$WARP_NS" warp-cli status | grep -q "Registered"; then
     echo
-    echo "[!] Требуется первоначальная регистрация."
-    echo "Выполните команды вручную:"
+    echo "[!] Требуется первоначальная регистрация WARP."
+    echo "Следуйте инструкциям ниже:"
+    echo
     echo "  ip netns exec $WARP_NS warp-cli register"
     echo
     echo "После регистрации выполните:"
@@ -93,11 +83,11 @@ fi
 ip netns exec "$WARP_NS" sysctl -w net.ipv4.ip_forward=1
 
 echo
-echo "[✓] Готово! WARP запущен в namespace '$WARP_NS'."
+echo "[✓] Настройка завершена!"
+echo "WARP работает в namespace '$WARP_NS' и принимает трафик от $WG_SUBNET."
 echo
-echo "Теперь обновите ваш wg0.conf, как указано в инструкции:"
-echo "  - Замените MASQUERADE на SNAT --to-source $WARP_GW"
-echo "  - Добавьте FORWARD между wg0 и $VETH_HOST"
+echo "Убедитесь, что в вашем wg0.conf используется SNAT на $WARP_GW:"
+echo "  iptables -t nat -A POSTROUTING -s $WG_SUBNET ! -d $WG_SUBNET -j SNAT --to-source $WARP_GW"
 echo
-echo "После этого выполните:"
+echo "После этого перезапустите WireGuard:"
 echo "  wg-quick down wg0 && wg-quick up wg0"
