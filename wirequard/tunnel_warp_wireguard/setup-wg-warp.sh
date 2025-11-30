@@ -64,7 +64,7 @@ if ! ip netns exec "$WARP_NS" warp-cli status &>/dev/null || \
     echo "[!] Требуется первоначальная регистрация WARP."
     echo "Следуйте инструкциям ниже:"
     echo
-    echo "  ip netns exec $WARP_NS warp-cli register"
+    echo "  ip netns exec $WARP_NS warp-cli registration new"
     echo
     echo "После регистрации выполните:"
     echo "  ip netns exec $WARP_NS warp-cli set mode tun"
