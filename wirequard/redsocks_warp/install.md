@@ -17,5 +17,6 @@ chmod +x wireguard-install.sh
 wg-quick down wg0
 wg-quick up wg0
 
+sudo wg show
 
 Обнови wg0.conf — добавь правила iptables
