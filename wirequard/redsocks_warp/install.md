@@ -10,6 +10,9 @@ sudo apt install redsocks -y
 sudo systemctl restart redsocks
 sudo systemctl enable redsocks
 
+curl -O https://raw.githubusercontent.com/angristan/wireguard-install/master/wireguard-install.sh
+chmod +x wireguard-install.sh
+./wireguard-install.sh
 
 wg-quick down wg0
 wg-quick up wg0
