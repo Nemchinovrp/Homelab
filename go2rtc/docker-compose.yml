@@ -1,0 +1,11 @@
+services:
+  go2rtc:
+    image: alexxit/go2rtc:latest
+    container_name: go2rtc
+    network_mode: host       # обязательно для WebRTC и UDP камер
+    privileged: true         # необходимо для аппаратного транскодинга FFmpeg
+    restart: unless-stopped  # автоматический перезапуск
+    environment:
+      - TZ=Europe/Moscow     # установите ваш часовой пояс
+    volumes:
+      - "~/go2rtc:/config"   # папка для файла конфигурации go2rtc.yaml

@@ -1,0 +1,3 @@
+streams:
+  # Даем потоку понятное имя, например, "forpost"
+  forpost: rtsp://ukVisota:5q81hM@video.dsi.ru/camera/18830/online
