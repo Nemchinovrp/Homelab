@@ -1,11 +1,22 @@
-version: '3'
+# compose.yaml
 services:
   homeassistant:
     container_name: homeassistant
-    image: "ghcr.io/home-assistant/home-assistant:stable"
-    volumes:
-      - /home/nemchin/homeassistant:/config
-      - /etc/localtime:/etc/localtime:ro
+    image: ghcr.io/home-assistant/home-assistant:stable
     restart: unless-stopped
-    privileged: true
+
     network_mode: host
+
+    volumes:
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro
+
+    environment:
+      TZ: Europe/Amsterdam
+
+    # Раскомментируй, если нужен USB Zigbee/Z-Wave адаптер:
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    #
+    # либо, например:
+    #   - /dev/ttyACM0:/dev/ttyACM0
