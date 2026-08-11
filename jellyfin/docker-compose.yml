@@ -1,0 +1,22 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+
+    ports:
+      - "8096:8096"
+
+    volumes:
+      # Конфиг Jellyfin
+      - ./jellyfin/config:/config
+
+      # Кэш, постеры, транскодирование
+      - ./jellyfin/cache:/cache
+
+      # Твоя медиатека
+      - ./media:/media:ro
+
+    environment:
+      - TZ=Europe/Amsterdam
+
+    restart: unless-stopped
