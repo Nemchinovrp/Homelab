@@ -14,7 +14,7 @@ services:
       - ./jellyfin/cache:/cache
 
       # Твоя медиатека
-      - ./media:/media:ro
+      - /home/roman/Downloads:/media:ro
 
     environment:
       - TZ=Europe/Amsterdam
