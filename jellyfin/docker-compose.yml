@@ -15,6 +15,7 @@ services:
 
       # Твоя медиатека
       - /home/roman/Downloads:/media:ro
+      - /home/roman/Music:/music:ro
 
     environment:
       - TZ=Europe/Amsterdam
