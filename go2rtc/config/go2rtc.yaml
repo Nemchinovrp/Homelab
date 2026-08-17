@@ -2,4 +2,4 @@ streams:
   detskaya_ploshadka:
     - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.126.detskaya.ploshadka-61c1a6ca45/index.m3u8?token=${PLAYBACK_TOKEN}#video=copy#audio=copy"
   krylco_d5b65fa148:
-    - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.126.krylco-d5b65fa148/index.m3u8?token=${PLAYBACK_TOKEN}#video=copy#audio=copy"
+    - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.126.krylco-d5b65fa148/index.m3u8?token=${KRYLCO_D5B65FA148_TOKEN}#video=copy#audio=copy"
