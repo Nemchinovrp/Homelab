@@ -4,6 +4,9 @@ services:
     container_name: go2rtc
     restart: unless-stopped
 
+    env_file:
+      - .env
+
     environment:
       TZ: Europe/Moscow
 
