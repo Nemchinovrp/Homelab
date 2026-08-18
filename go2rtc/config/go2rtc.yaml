@@ -11,3 +11,5 @@ streams:
     - "ffmpeg:https://vs3.newbwc.ru/osvobozhdeniya.128.vn.dvor-badd9d0ea2/index.m3u8?token=${VN_DVOR_128_TOKEN}#video=copy"
   torec_126:
     - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.126.torec-4b8720e1a6/index.m3u8?token=${TOREC_126_TOKEN}#video=copy"
+  etazh_1_130:
+    - "ffmpeg:https://vs4.newbwc.ru/osvobozhdeniya.130.1.etazh-2a08469b95/index.m3u8?token=${ETAZH_1_130_TOKEN}#video=copy"
