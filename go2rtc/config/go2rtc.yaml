@@ -15,3 +15,7 @@ streams:
     - "ffmpeg:https://vs4.newbwc.ru/osvobozhdeniya.130.1.etazh-2a08469b95/index.m3u8?token=${ETAZH_1_130_TOKEN}#video=copy"
   sport_ploshadka_126:
     - "ffmpeg:https://vs2.newbwc.ru/osvobozhdeniya.126.sport.ploshadka-f97d1fbce7/index.m3u8?token=${SPORT_PLOSHADKA_126_TOKEN}#video=copy"
+  parkovka_128:
+    - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.128.parkovka-9566f5570b/index.m3u8?token=${PARKOVKA_128_TOKEN}#video=copy"
+  parkovka_128_2:
+    - "ffmpeg:https://vs3.newbwc.ru/osvobozhdeniya.128.parkovka-be228782f0/index.m3u8?token=${PARKOVKA_128_2_TOKEN}#video=copy"
