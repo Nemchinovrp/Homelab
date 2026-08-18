@@ -7,3 +7,7 @@ streams:
     - "ffmpeg:https://vs3.newbwc.ru/osvobozhdeniya.130.krylco-93d31cec82/index.m3u8?token=${KRYLCO_130_TOKEN}#video=copy"
   dvor_128:
     - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.128.dvor-cb8264deb5/index.m3u8?token=${DVOR_128_TOKEN}#video=copy"
+  vn_dvor_128:
+    - "ffmpeg:https://vs3.newbwc.ru/osvobozhdeniya.128.vn.dvor-badd9d0ea2/index.m3u8?token=${VN_DVOR_128_TOKEN}#video=copy"
+  torec_126:
+    - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.126.torec-4b8720e1a6/index.m3u8?token=${TOREC_126_TOKEN}#video=copy"
