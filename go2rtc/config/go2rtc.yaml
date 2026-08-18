@@ -1,3 +1,6 @@
+ffmpeg:
+  dsi: '-user_agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150.0.0.0 Safari/537.36" -headers "Origin: https://video.dsi.ru\r\nReferer: https://video.dsi.ru/\r\n" -i {input}'
+
 streams:
   detskaya_ploshadka_61c1a6ca45:
     - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.126.detskaya.ploshadka-61c1a6ca45/index.m3u8?token=${DETSKAYA_PLOSHADKA_61C1A6CA45_TOKEN}#video=copy#audio=copy"
@@ -21,5 +24,5 @@ streams:
     - "ffmpeg:https://vs3.newbwc.ru/osvobozhdeniya.128.parkovka-be228782f0/index.m3u8?token=${PARKOVKA_128_2_TOKEN}#video=copy"
   parkovka_2_130:
     - "ffmpeg:https://vs2.newbwc.ru/osvobozhdeniya.130.parkovka.2-338fad0443/index.m3u8?token=${PARKOVKA_2_130_TOKEN}#video=copy"
-  dsi_173476502:
-    - "ffmpeg:${DSI_173476502_URL}#video=copy"
+  dsi_173481138:
+    - "ffmpeg:${DSI_173481138_URL}#input=dsi#video=copy"
