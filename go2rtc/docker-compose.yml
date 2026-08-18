@@ -9,6 +9,7 @@ services:
 
     environment:
       TZ: Europe/Moscow
+      OPENSSL_CONF: /config/openssl.cnf
 
     ports:
       - "1984:1984/tcp" # Web UI и HTTP API
