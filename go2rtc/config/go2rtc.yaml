@@ -5,3 +5,5 @@ streams:
     - "ffmpeg:https://vs3.newbwc.ru/osvobozhdeniya.126.krylco-d5b65fa148/index.m3u8?token=${KRYLCO_D5B65FA148_TOKEN}#video=copy"
   krylco_130:
     - "ffmpeg:https://vs3.newbwc.ru/osvobozhdeniya.130.krylco-93d31cec82/index.m3u8?token=${KRYLCO_130_TOKEN}#video=copy"
+  dvor_128:
+    - "ffmpeg:https://vs6.newbwc.ru/osvobozhdeniya.128.dvor-cb8264deb5/index.m3u8?token=${DVOR_128_TOKEN}#video=copy"
