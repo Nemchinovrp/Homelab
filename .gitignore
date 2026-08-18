@@ -2,3 +2,4 @@
 .env
 .DS_Store
 go2rtc/.env
+go2rtc/.dsi.env
