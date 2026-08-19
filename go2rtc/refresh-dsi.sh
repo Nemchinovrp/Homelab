@@ -130,14 +130,29 @@ get_hls_url() {
     return 1
   fi
 
-  playlist="$(
+  # Сначала проверяем обычным способом — он подходит для macOS.
+  if ! playlist="$(
     curl --fail --silent --show-error --http1.1 \
       --url "$hls_url" \
       -H 'Accept: */*' \
       -H 'Origin: https://video.dsi.ru' \
       -H 'Referer: https://video.dsi.ru/' \
       -H 'User-Agent: Mozilla/5.0'
-  )"
+  )"; then
+    echo "Камера ${camera_id}: повторная TLS-проверка с SECLEVEL=1" >&2
+
+    # Нужен на Linux для устаревшего короткого DH-ключа DSI.
+    playlist="$(
+      curl --fail --silent --show-error --http1.1 \
+        --tls-max 1.2 \
+        --ciphers 'DEFAULT:@SECLEVEL=1' \
+        --url "$hls_url" \
+        -H 'Accept: */*' \
+        -H 'Origin: https://video.dsi.ru' \
+        -H 'Referer: https://video.dsi.ru/' \
+        -H 'User-Agent: Mozilla/5.0'
+    )"
+  fi
 
   if ! printf '%s\n' "$playlist" | grep -q '^#EXTM3U'; then
     echo "Камера ${camera_id}: получен некорректный HLS-плейлист" >&2
