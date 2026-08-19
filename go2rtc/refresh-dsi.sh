@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-#PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 export PATH="/opt/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:${PATH:-}"
 
 PROJECT_DIR="$(
@@ -10,13 +9,11 @@ PROJECT_DIR="$(
   pwd
 )"
 
-#PROJECT_DIR="/Users/roman/IdeaProjects/homelab/go2rtc"
 ENV_FILE="$PROJECT_DIR/.env"
 SECRET_FILE="$PROJECT_DIR/.dsi.env"
 LOCK_DIR="$PROJECT_DIR/.refresh-dsi.lock"
 
-# Формат:
-# camera_id|переменная_в_env|referer
+# Формат: camera_id|переменная_в_env|referer
 CAMERAS=(
   "18894|DSI_173481138_URL|https://video.dsi.ru/account/camera/18894/view.html?backPage=5"
   "18882|DSI_173547486_URL|https://video.dsi.ru/account/view.html?page=4"
@@ -28,6 +25,16 @@ CAMERAS=(
 )
 
 TEMPORARY_FILE=""
+CURL_HLS_TLS_ARGS=()
+
+# DSI использует устаревший короткий DH-ключ. Linux curl с OpenSSL
+# требует SECLEVEL=1. Системный curl macOS этот синтаксис не поддерживает.
+if [[ "$(uname -s)" == "Linux" ]]; then
+  CURL_HLS_TLS_ARGS=(
+    --tls-max 1.2
+    --ciphers 'DEFAULT:@SECLEVEL=1'
+  )
+fi
 
 cleanup() {
   if [[ -n "$TEMPORARY_FILE" && -f "$TEMPORARY_FILE" ]]; then
@@ -43,18 +50,29 @@ trap cleanup EXIT INT TERM
 
 cd "$PROJECT_DIR"
 
-# Не допускаем параллельный запуск нескольких копий.
-if ! mkdir "$LOCK_DIR" 2>/dev/null; then
-  echo "Обновление уже выполняется"
+if [[ -d "$LOCK_DIR" ]]; then
+  echo "Обновление уже выполняется или осталась старая блокировка:"
+  echo "$LOCK_DIR"
   exit 0
 fi
 
-for command_name in curl jq awk docker; do
+if ! mkdir "$LOCK_DIR"; then
+  echo "Не удалось создать блокировку: $LOCK_DIR"
+  echo "Проверь владельца и права папки: $PROJECT_DIR"
+  exit 1
+fi
+
+for command_name in curl jq awk sed grep docker uname; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
     echo "Не найдена команда: $command_name"
     exit 1
   fi
 done
+
+if ! docker compose version >/dev/null 2>&1; then
+  echo "Не найден Docker Compose"
+  exit 1
+fi
 
 if [[ ! -f "$SECRET_FILE" ]]; then
   echo "Не найден файл с cookie: $SECRET_FILE"
@@ -122,7 +140,6 @@ get_hls_url() {
     printf '%s' "$rtsp_url" |
       sed 's|/rtsp/|/hls/|'
   )"
-
   hls_url="${hls_url%/}/playlist.m3u8"
 
   if [[ ! "$hls_url" =~ ^https://[^/:]+:[0-9]+/hls/.+/playlist\.m3u8$ ]]; then
@@ -130,29 +147,15 @@ get_hls_url() {
     return 1
   fi
 
-  # Сначала проверяем обычным способом — он подходит для macOS.
-  if ! playlist="$(
+  playlist="$(
     curl --fail --silent --show-error --http1.1 \
+      "${CURL_HLS_TLS_ARGS[@]}" \
       --url "$hls_url" \
       -H 'Accept: */*' \
       -H 'Origin: https://video.dsi.ru' \
       -H 'Referer: https://video.dsi.ru/' \
       -H 'User-Agent: Mozilla/5.0'
-  )"; then
-    echo "Камера ${camera_id}: повторная TLS-проверка с SECLEVEL=1" >&2
-
-    # Нужен на Linux для устаревшего короткого DH-ключа DSI.
-    playlist="$(
-      curl --fail --silent --show-error --http1.1 \
-        --tls-max 1.2 \
-        --ciphers 'DEFAULT:@SECLEVEL=1' \
-        --url "$hls_url" \
-        -H 'Accept: */*' \
-        -H 'Origin: https://video.dsi.ru' \
-        -H 'Referer: https://video.dsi.ru/' \
-        -H 'User-Agent: Mozilla/5.0'
-    )"
-  fi
+  )"
 
   if ! printf '%s\n' "$playlist" | grep -q '^#EXTM3U'; then
     echo "Камера ${camera_id}: получен некорректный HLS-плейлист" >&2
@@ -171,9 +174,7 @@ update_env_variable() {
   awk \
     -v key="$variable_name" \
     -v value="$variable_value" '
-      BEGIN {
-        found = 0
-      }
+      BEGIN { found = 0 }
 
       index($0, key "=") == 1 {
         print key "=" value
@@ -181,9 +182,7 @@ update_env_variable() {
         next
       }
 
-      {
-        print
-      }
+      { print }
 
       END {
         if (!found) {
@@ -199,16 +198,16 @@ update_env_variable() {
 
 echo "Получаю свежие ссылки для ${#CAMERAS[@]} камер..."
 
+# Сначала получаем и проверяем все ссылки. Если одна проверка завершится
+# ошибкой, .env останется без изменений.
 for camera_config in "${CAMERAS[@]}"; do
   IFS='|' read -r camera_id variable_name referer <<< "$camera_config"
 
   echo "Проверяю камеру ${camera_id}..."
-
   hls_url="$(get_hls_url "$camera_id" "$referer")"
 
   VARIABLE_NAMES+=("$variable_name")
   HLS_URLS+=("$hls_url")
-
   echo "Камера ${camera_id}: ссылка получена и проверена"
 done
 
@@ -239,7 +238,5 @@ if [[ "$changed" -eq 0 ]]; then
 fi
 
 echo "Пересоздаю контейнер go2rtc..."
-
 docker compose up -d --force-recreate go2rtc
-
 echo "Готово: ссылки обновлены, go2rtc перезапущен"
