@@ -17,6 +17,7 @@ CAMERAS=(
   "18902|DSI_173588244_URL|https://video.dsi.ru/account/view.html?page=6"
   "18918|DSI_173588440_URL|https://video.dsi.ru/account/view.html?page=8"
   "20108|DSI_173588496_URL|https://video.dsi.ru/account/view.html?page=9"
+  "21752|DSI_173588798_URL|https://video.dsi.ru/account/view.html?page=17"
 )
 
 TEMPORARY_FILE=""
