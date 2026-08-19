@@ -8,3 +8,6 @@ sudo systemctl enable --now ssh
 
 После этого проверь:
 sudo systemctl status ssh
+
+Чтобы не вводить пароль:
+ssh-copy-id user@server
