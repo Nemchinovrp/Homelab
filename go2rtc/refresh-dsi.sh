@@ -4,7 +4,12 @@ set -euo pipefail
 
 PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
-PROJECT_DIR="/Users/roman/IdeaProjects/homelab/go2rtc"
+PROJECT_DIR="$(
+  cd "$(dirname "${BASH_SOURCE[0]}")" &&
+  pwd
+)"
+
+#PROJECT_DIR="/Users/roman/IdeaProjects/homelab/go2rtc"
 ENV_FILE="$PROJECT_DIR/.env"
 SECRET_FILE="$PROJECT_DIR/.dsi.env"
 LOCK_DIR="$PROJECT_DIR/.refresh-dsi.lock"
