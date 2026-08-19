@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+#PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH="/opt/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:${PATH:-}"
 
 PROJECT_DIR="$(
   cd "$(dirname "${BASH_SOURCE[0]}")" &&
