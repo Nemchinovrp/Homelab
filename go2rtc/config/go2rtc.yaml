@@ -28,3 +28,5 @@ streams:
     - "ffmpeg:${DSI_173481138_URL}#input=dsi#video=copy"
   dsi_173547486:
     - "ffmpeg:${DSI_173547486_URL}#input=dsi#video=copy"
+  dsi_173588244:
+    - "ffmpeg:${DSI_173588244_URL}#input=dsi#video=copy"

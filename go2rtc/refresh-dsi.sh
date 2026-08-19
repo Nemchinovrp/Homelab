@@ -14,6 +14,7 @@ LOCK_DIR="$PROJECT_DIR/.refresh-dsi.lock"
 CAMERAS=(
   "18894|DSI_173481138_URL|https://video.dsi.ru/account/camera/18894/view.html?backPage=5"
   "18882|DSI_173547486_URL|https://video.dsi.ru/account/view.html?page=4"
+  "18902|DSI_173588244_URL|https://video.dsi.ru/account/view.html?page=6"
 )
 
 TEMPORARY_FILE=""
