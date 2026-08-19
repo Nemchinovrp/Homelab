@@ -6,3 +6,18 @@ crontab -e
 
 Добавь:
 */15 * * * * /Users/roman/IdeaProjects/homelab/go2rtc/refresh-dsi.sh >> /tmp/refresh-dsi.log 2>&1
+
+
+
+как обновить куки
+Чтобы заменить раскрытую cookie DSI:
+Выйди из аккаунта на video.dsi.ru через кнопку выхода.
+Закрой вкладки DSI.
+Снова войди на сайт — будет создана новая сессия.
+Открой камеру.
+В DevTools → Network найди запрос:
+url.html
+Нажми правой кнопкой:
+Copy → Copy as cURL
+В скопированной команде найди:
+-b 'html5=1; ...'
