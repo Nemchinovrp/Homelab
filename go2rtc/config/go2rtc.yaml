@@ -26,3 +26,5 @@ streams:
     - "ffmpeg:https://vs2.newbwc.ru/osvobozhdeniya.130.parkovka.2-338fad0443/index.m3u8?token=${PARKOVKA_2_130_TOKEN}#video=copy"
   dsi_173481138:
     - "ffmpeg:${DSI_173481138_URL}#input=dsi#video=copy"
+  dsi_173547486:
+    - "ffmpeg:${DSI_173547486_URL}#input=dsi#video=copy"

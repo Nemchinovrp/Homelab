@@ -9,11 +9,17 @@ ENV_FILE="$PROJECT_DIR/.env"
 SECRET_FILE="$PROJECT_DIR/.dsi.env"
 LOCK_DIR="$PROJECT_DIR/.refresh-dsi.lock"
 
-VARIABLE_NAME="DSI_173481138_URL"
-CAMERA_ID="18894"
+# Формат:
+# camera_id|переменная_в_env|referer
+CAMERAS=(
+  "18894|DSI_173481138_URL|https://video.dsi.ru/account/camera/18894/view.html?backPage=5"
+  "18882|DSI_173547486_URL|https://video.dsi.ru/account/view.html?page=4"
+)
+
+TEMPORARY_FILE=""
 
 cleanup() {
-  if [[ -n "${TEMPORARY_FILE:-}" && -f "$TEMPORARY_FILE" ]]; then
+  if [[ -n "$TEMPORARY_FILE" && -f "$TEMPORARY_FILE" ]]; then
     rm -f "$TEMPORARY_FILE"
   fi
 
@@ -26,7 +32,7 @@ trap cleanup EXIT INT TERM
 
 cd "$PROJECT_DIR"
 
-# Не допускаем одновременный запуск нескольких копий скрипта.
+# Не допускаем параллельный запуск нескольких копий.
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
   echo "Обновление уже выполняется"
   exit 0
@@ -49,9 +55,6 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-# В .dsi.env должна быть строка:
-# DSI_COOKIE='html5=1; soundVolume=0; PHPSESSIDFPST=...'
-#
 # shellcheck disable=SC1090
 source "$SECRET_FILE"
 
@@ -60,112 +63,157 @@ if [[ -z "${DSI_COOKIE:-}" ]]; then
   exit 1
 fi
 
-echo "Запрашиваю свежую ссылку камеры DSI..."
+VARIABLE_NAMES=()
+HLS_URLS=()
 
-cache_buster="$(date +%s)000"
+get_hls_url() {
+  local camera_id="$1"
+  local referer="$2"
+  local cache_buster
+  local response
+  local rtsp_url
+  local hls_url
+  local playlist
 
-response="$(
-  curl --fail --silent --show-error \
-    --get \
-    --url "https://video.dsi.ru/account/camera/${CAMERA_ID}/url.html" \
-    --data-urlencode 'time=' \
-    --data-urlencode 'timeZoneOffset=10800' \
-    --data-urlencode 'format=hls' \
-    --data-urlencode "_=${cache_buster}" \
-    -H 'Accept: application/json, text/javascript, */*; q=0.01' \
-    -H "Referer: https://video.dsi.ru/account/camera/${CAMERA_ID}/view.html?backPage=5" \
-    -H 'User-Agent: Mozilla/5.0' \
-    -H 'X-Requested-With: XMLHttpRequest' \
-    -b "$DSI_COOKIE"
-)"
+  cache_buster="$(date +%s)000"
 
-if ! printf '%s' "$response" | jq -e . >/dev/null 2>&1; then
-  echo "DSI вернул ответ, который не является JSON"
-  exit 1
-fi
+  response="$(
+    curl --fail --silent --show-error \
+      --get \
+      --url "https://video.dsi.ru/account/camera/${camera_id}/url.html" \
+      --data-urlencode 'time=' \
+      --data-urlencode 'timeZoneOffset=10800' \
+      --data-urlencode 'format=hls' \
+      --data-urlencode "_=${cache_buster}" \
+      -H 'Accept: application/json, text/javascript, */*; q=0.01' \
+      -H "Referer: ${referer}" \
+      -H 'User-Agent: Mozilla/5.0' \
+      -H 'X-Requested-With: XMLHttpRequest' \
+      -b "$DSI_COOKIE"
+  )"
 
-rtsp_url="$(
-  printf '%s' "$response" |
-    jq -er '
-      select(.Error == false and .Status == true)
-      | select(.URL != null and .URL != "")
-      | .URL
-    ' |
-    tr -d '\r\n'
-)"
+  if ! printf '%s' "$response" | jq -e . >/dev/null 2>&1; then
+    echo "Камера ${camera_id}: сервер вернул не JSON" >&2
+    return 1
+  fi
 
-hls_url="$(
-  printf '%s' "$rtsp_url" |
-    sed 's|/rtsp/|/hls/|'
-)"
+  rtsp_url="$(
+    printf '%s' "$response" |
+      jq -er '
+        select(.Error == false and .Status == true)
+        | select(.URL != null and .URL != "")
+        | .URL
+      ' |
+      tr -d '\r\n'
+  )"
 
-hls_url="${hls_url%/}/playlist.m3u8"
+  hls_url="$(
+    printf '%s' "$rtsp_url" |
+      sed 's|/rtsp/|/hls/|'
+  )"
 
-if [[ ! "$hls_url" =~ ^https://[^/:]+:[0-9]+/hls/.+/playlist\.m3u8$ ]]; then
-  echo "DSI вернул адрес неожиданного формата"
-  exit 1
-fi
+  hls_url="${hls_url%/}/playlist.m3u8"
 
-echo "Проверяю HLS-поток..."
+  if [[ ! "$hls_url" =~ ^https://[^/:]+:[0-9]+/hls/.+/playlist\.m3u8$ ]]; then
+    echo "Камера ${camera_id}: получен адрес неожиданного формата" >&2
+    return 1
+  fi
 
-playlist="$(
-  curl --fail --silent --show-error --http1.1 \
-    --url "$hls_url" \
-    -H 'Accept: */*' \
-    -H 'Origin: https://video.dsi.ru' \
-    -H 'Referer: https://video.dsi.ru/' \
-    -H 'User-Agent: Mozilla/5.0'
-)"
+  playlist="$(
+    curl --fail --silent --show-error --http1.1 \
+      --url "$hls_url" \
+      -H 'Accept: */*' \
+      -H 'Origin: https://video.dsi.ru' \
+      -H 'Referer: https://video.dsi.ru/' \
+      -H 'User-Agent: Mozilla/5.0'
+  )"
 
-if ! printf '%s\n' "$playlist" | grep -q '^#EXTM3U'; then
-  echo "Полученный адрес не вернул корректный HLS-плейлист"
-  exit 1
-fi
+  if ! printf '%s\n' "$playlist" | grep -q '^#EXTM3U'; then
+    echo "Камера ${camera_id}: получен некорректный HLS-плейлист" >&2
+    return 1
+  fi
 
-current_url="$(
-  sed -n "s/^${VARIABLE_NAME}=//p" "$ENV_FILE" |
-    head -n 1
-)"
+  printf '%s' "$hls_url"
+}
 
-if [[ "$current_url" == "$hls_url" ]]; then
-  echo "Ссылка не изменилась — перезапуск не требуется"
+update_env_variable() {
+  local variable_name="$1"
+  local variable_value="$2"
+
+  TEMPORARY_FILE="$(mktemp "${ENV_FILE}.tmp.XXXXXX")"
+
+  awk \
+    -v key="$variable_name" \
+    -v value="$variable_value" '
+      BEGIN {
+        found = 0
+      }
+
+      index($0, key "=") == 1 {
+        print key "=" value
+        found = 1
+        next
+      }
+
+      {
+        print
+      }
+
+      END {
+        if (!found) {
+          print key "=" value
+        }
+      }
+    ' "$ENV_FILE" > "$TEMPORARY_FILE"
+
+  chmod 600 "$TEMPORARY_FILE"
+  mv "$TEMPORARY_FILE" "$ENV_FILE"
+  TEMPORARY_FILE=""
+}
+
+echo "Получаю свежие ссылки для ${#CAMERAS[@]} камер..."
+
+for camera_config in "${CAMERAS[@]}"; do
+  IFS='|' read -r camera_id variable_name referer <<< "$camera_config"
+
+  echo "Проверяю камеру ${camera_id}..."
+
+  hls_url="$(get_hls_url "$camera_id" "$referer")"
+
+  VARIABLE_NAMES+=("$variable_name")
+  HLS_URLS+=("$hls_url")
+
+  echo "Камера ${camera_id}: ссылка получена и проверена"
+done
+
+changed=0
+
+for ((index = 0; index < ${#VARIABLE_NAMES[@]}; index++)); do
+  variable_name="${VARIABLE_NAMES[$index]}"
+  hls_url="${HLS_URLS[$index]}"
+
+  current_url="$(
+    sed -n "s/^${variable_name}=//p" "$ENV_FILE" |
+      head -n 1
+  )"
+
+  if [[ "$current_url" == "$hls_url" ]]; then
+    echo "${variable_name}: ссылка не изменилась"
+    continue
+  fi
+
+  echo "${variable_name}: обновляю ссылку"
+  update_env_variable "$variable_name" "$hls_url"
+  changed=1
+done
+
+if [[ "$changed" -eq 0 ]]; then
+  echo "Все ссылки актуальны — перезапуск не требуется"
   exit 0
 fi
-
-echo "Обновляю $VARIABLE_NAME в .env..."
-
-TEMPORARY_FILE="$(mktemp "${ENV_FILE}.tmp.XXXXXX")"
-
-awk \
-  -v key="$VARIABLE_NAME" \
-  -v value="$hls_url" '
-    BEGIN {
-      found = 0
-    }
-
-    index($0, key "=") == 1 {
-      print key "=" value
-      found = 1
-      next
-    }
-
-    {
-      print
-    }
-
-    END {
-      if (!found) {
-        print key "=" value
-      }
-    }
-  ' "$ENV_FILE" > "$TEMPORARY_FILE"
-
-chmod --reference="$ENV_FILE" "$TEMPORARY_FILE" 2>/dev/null || chmod 600 "$TEMPORARY_FILE"
-mv "$TEMPORARY_FILE" "$ENV_FILE"
-TEMPORARY_FILE=""
 
 echo "Пересоздаю контейнер go2rtc..."
 
 docker compose up -d --force-recreate go2rtc
 
-echo "Готово: ссылка DSI обновлена, go2rtc перезапущен"
+echo "Готово: ссылки обновлены, go2rtc перезапущен"
