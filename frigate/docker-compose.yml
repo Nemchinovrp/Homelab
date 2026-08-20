@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     stop_grace_period: 30s
 
-    shm_size: "768mb"
+    shm_size: "2128mb"
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
