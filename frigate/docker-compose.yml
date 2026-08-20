@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     stop_grace_period: 30s
 
-    shm_size: "512mb"
+    shm_size: "768mb"
 
     volumes:
       - ./config:/config
@@ -19,6 +19,3 @@ services:
 
     ports:
       - "8971:8971"
-      - "8554:8554"
-      - "8555:8555/tcp"
-      - "8555:8555/udp"
