@@ -31,3 +31,6 @@ frigate/config/frigate.db
 frigate/config/frigate.db-shm
 frigate/config/frigate.db-wal
 frigate/config/go2rtc_homekit.yml
+frigate/storage/clips
+frigate/storage/exports
+frigate/storage/recordings
