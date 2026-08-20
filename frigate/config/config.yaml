@@ -18,7 +18,7 @@ cameras:
   detskaya_ploshadka_61c1a6ca45:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/detskaya_ploshadka_61c1a6ca45
+        - path: rtsp://host.docker.internal:8554/detskaya_ploshadka_61c1a6ca45
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -26,7 +26,7 @@ cameras:
   krylco_d5b65fa148:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/krylco_d5b65fa148
+        - path: rtsp://host.docker.internal:8554/krylco_d5b65fa148
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -34,7 +34,7 @@ cameras:
   krylco_130:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/krylco_130
+        - path: rtsp://host.docker.internal:8554/krylco_130
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -42,7 +42,7 @@ cameras:
   dvor_128:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dvor_128
+        - path: rtsp://host.docker.internal:8554/dvor_128
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -50,7 +50,7 @@ cameras:
   vn_dvor_128:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/vn_dvor_128
+        - path: rtsp://host.docker.internal:8554/vn_dvor_128
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -58,7 +58,7 @@ cameras:
   torec_126:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/torec_126
+        - path: rtsp://host.docker.internal:8554/torec_126
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -66,7 +66,7 @@ cameras:
   etazh_1_130:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/etazh_1_130
+        - path: rtsp://host.docker.internal:8554/etazh_1_130
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -74,7 +74,7 @@ cameras:
   sport_ploshadka_126:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/sport_ploshadka_126
+        - path: rtsp://host.docker.internal:8554/sport_ploshadka_126
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -82,7 +82,7 @@ cameras:
   parkovka_128:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/parkovka_128
+        - path: rtsp://host.docker.internal:8554/parkovka_128
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -90,7 +90,7 @@ cameras:
   parkovka_128_2:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/parkovka_128_2
+        - path: rtsp://host.docker.internal:8554/parkovka_128_2
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -98,7 +98,7 @@ cameras:
   parkovka_2_130:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/parkovka_2_130
+        - path: rtsp://host.docker.internal:8554/parkovka_2_130
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -106,7 +106,7 @@ cameras:
   dsi_173481138:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dsi_173481138
+        - path: rtsp://host.docker.internal:8554/dsi_173481138
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -114,7 +114,7 @@ cameras:
   dsi_173547486:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dsi_173547486
+        - path: rtsp://host.docker.internal:8554/dsi_173547486
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -122,7 +122,7 @@ cameras:
   dsi_173588244:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dsi_173588244
+        - path: rtsp://host.docker.internal:8554/dsi_173588244
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -130,7 +130,7 @@ cameras:
   dsi_173588440:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dsi_173588440
+        - path: rtsp://host.docker.internal:8554/dsi_173588440
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -138,7 +138,7 @@ cameras:
   dsi_173588496:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dsi_173588496
+        - path: rtsp://host.docker.internal:8554/dsi_173588496
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -146,7 +146,7 @@ cameras:
   dsi_173588798:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dsi_173588798
+        - path: rtsp://host.docker.internal:8554/dsi_173588798
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -154,7 +154,7 @@ cameras:
   dsi_173588876:
     ffmpeg:
       inputs:
-        - path: rtsp://go2rtc:8554/dsi_173588876
+        - path: rtsp://host.docker.internal:8554/dsi_173588876
           input_args: preset-rtsp-restream
           roles:
             - detect
