@@ -7,6 +7,8 @@ crontab -e
 Добавь:
 */15 * * * * /Users/roman/IdeaProjects/homelab/go2rtc/refresh-dsi.sh >> /tmp/refresh-dsi.log 2>&1
 
+refresh-dsi.sh - это скрипт нужен для получения актульной ссылки(рефреша токенов)
+
 
 
 как обновить куки
