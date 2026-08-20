@@ -2,7 +2,7 @@ mqtt:
   enabled: false
 
 detect:
-  enabled: true
+  enabled: false
   fps: 5
 
 objects:
