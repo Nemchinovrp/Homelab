@@ -13,5 +13,5 @@ services:
       ND_SESSIONTIMEOUT: 24h
 
     volumes:
-      - /opt/navidrome/data:/data
+      - /home/roman/navidrome/data:/data
       - /home/roman/Music:/music:ro
