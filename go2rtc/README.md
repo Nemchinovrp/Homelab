@@ -5,7 +5,7 @@
 crontab -e
 
 Добавь:
-*/15 * * * * /home/roman/PycharmProjects/Homelab/go2rtc/refresh-dsi.sh >> /tmp/refresh-dsi.log 2>&1
+*/5 * * * * /home/roman/PycharmProjects/Homelab/go2rtc/refresh-dsi.sh >> /home/roman/PycharmProjects/Homelab/go2rtc/refresh-dsi.log 2>&1
 
 refresh-dsi.sh - это скрипт нужен для получения актульной ссылки(рефреша токенов)
 
