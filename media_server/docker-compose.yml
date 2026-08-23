@@ -12,11 +12,11 @@ services:
       - "7359:7359/udp"
 
     volumes:
-      - ./config/jellyfin:/config
-      - ./config/jellyfin-cache:/cache
+      - /home/roman/jellyfin/config:/config
+      - /home/roman/jellyfin/cache:/cache
 
       # Jellyfin только читает медиатеку.
-      - /data/media:/media:ro
+      - /home/roman/Downloads:/media:ro
 
     environment:
       TZ: ${TZ}
