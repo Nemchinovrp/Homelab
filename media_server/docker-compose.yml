@@ -6,20 +6,19 @@ services:
 
     user: "${PUID}:${PGID}"
 
+    environment:
+      TZ: ${TZ}
 
     ports:
       - "8096:8096/tcp"
       - "7359:7359/udp"
 
     volumes:
-      - /home/roman/jellyfin/config:/config
-      - /home/roman/jellyfin/cache:/cache
+      - /home/roman/media-stack/config/jellyfin:/config
+      - /home/roman/media-stack/config/jellyfin-cache:/cache
 
-      # Jellyfin только читает медиатеку.
-      - /home/roman/Downloads:/media:ro
-
-    environment:
-      TZ: ${TZ}
+      # Jellyfin только читает готовую медиатеку
+      - /home/roman/media-stack/data/media:/media:ro
 
     restart: unless-stopped
 
@@ -38,10 +37,10 @@ services:
       UMASK: "002"
 
     volumes:
-      - ./config/sonarr:/config
+      - /home/roman/media-stack/config/sonarr:/config
 
-      # Важно: единый /data.
-      - /data:/data
+      # Один общий mount для downloads + media
+      - /home/roman/media-stack/data:/data
 
     ports:
       - "8989:8989"
@@ -63,10 +62,10 @@ services:
       UMASK: "002"
 
     volumes:
-      - ./config/radarr:/config
+      - /home/roman/media-stack/config/radarr:/config
 
-      # Важно: тот же /data, что у Sonarr.
-      - /data:/data
+      # Тот же /data, что и у Sonarr
+      - /home/roman/media-stack/data:/data
 
     ports:
       - "7878:7878"
@@ -88,7 +87,7 @@ services:
       UMASK: "002"
 
     volumes:
-      - ./config/prowlarr:/config
+      - /home/roman/media-stack/config/prowlarr:/config
 
     ports:
       - "9696:9696"
