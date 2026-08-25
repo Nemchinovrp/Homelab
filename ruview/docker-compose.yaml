@@ -1,0 +1,25 @@
+services:
+  ruview:
+    image: ruvnet/wifi-densepose:latest
+    container_name: ruview
+
+    restart: unless-stopped
+
+    ports:
+      # Web UI / REST API
+      - "3000:3000"
+
+      # WebSocket
+      - "3001:3001"
+
+      # ESP32 CSI
+      - "5005:5005/udp"
+
+    environment:
+      RUST_LOG: info
+
+    volumes:
+      - ruview-data:/app/data
+
+volumes:
+  ruview-data:
