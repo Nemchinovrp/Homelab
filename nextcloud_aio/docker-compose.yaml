@@ -1,0 +1,37 @@
+name: nextcloud-aio
+
+services:
+  nextcloud-aio-mastercontainer:
+    image: ghcr.io/nextcloud-releases/all-in-one:latest
+    init: true
+    restart: always
+
+    # НЕ МЕНЯТЬ — Nextcloud AIO требует это имя
+    container_name: nextcloud-aio-mastercontainer
+
+    volumes:
+      # НЕ МЕНЯТЬ имя volume
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+
+      # AIO через этот socket создаёт остальные контейнеры
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    network_mode: bridge
+
+    ports:
+      # host:container
+      - "27180:80"
+
+      # AIO Admin Interface (HTTPS / self-signed)
+      - "27181:8080"
+
+      - "27182:8443"
+
+    environment:
+      NEXTCLOUD_UPLOAD_LIMIT: "16G"
+      NEXTCLOUD_MEMORY_LIMIT: "1024M"
+      NEXTCLOUD_MAX_TIME: "3600"
+
+volumes:
+  nextcloud_aio_mastercontainer:
+    name: nextcloud_aio_mastercontainer
