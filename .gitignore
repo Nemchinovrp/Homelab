@@ -39,3 +39,4 @@ media_server/config/jellyfin-cache
 media_server/config/prowlarr
 media_server/config/radarr
 media_server/config/sonarr
+go2rtc/refresh-dsi.log
