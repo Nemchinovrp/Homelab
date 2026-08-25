@@ -6,13 +6,23 @@ services:
     restart: unless-stopped
 
     ports:
+      # Web UI
       - "3123:3000"
+
+      # WebSocket
       - "3001:3001"
+
+      # ESP32 CSI
       - "5005:5005/udp"
 
     environment:
       RUST_LOG: info
+
+      # Разрешаем работу без API-токена в доверенной LAN
       RUVIEW_ALLOW_UNAUTHENTICATED: "1"
+
+      # Разрешаем доступ через IP нашей Ubuntu VM
+      SENSING_ALLOWED_HOSTS: "192.168.8.89:3123"
 
     volumes:
       - ruview-data:/app/data
