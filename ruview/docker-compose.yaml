@@ -6,18 +6,13 @@ services:
     restart: unless-stopped
 
     ports:
-      # Web UI / REST API
-      # Снаружи:3123 -> внутри контейнера:3000
       - "3123:3000"
-
-      # WebSocket
       - "3001:3001"
-
-      # ESP32 CSI
       - "5005:5005/udp"
 
     environment:
       RUST_LOG: info
+      RUVIEW_ALLOW_UNAUTHENTICATED: "1"
 
     volumes:
       - ruview-data:/app/data
