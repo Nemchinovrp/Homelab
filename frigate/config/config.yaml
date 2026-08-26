@@ -2,7 +2,7 @@ mqtt:
   enabled: false
 
 detect:
-  enabled: true
+  enabled: false
   fps: 5
 
 objects:
@@ -20,85 +20,74 @@ cameras:
       inputs:
         - path: rtsp://host.docker.internal:8554/detskaya_ploshadka_61c1a6ca45
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   krylco_d5b65fa148:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/krylco_d5b65fa148
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   krylco_130:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/krylco_130
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   dvor_128:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/dvor_128
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   vn_dvor_128:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/vn_dvor_128
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   torec_126:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/torec_126
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   etazh_1_130:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/etazh_1_130
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   sport_ploshadka_126:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/sport_ploshadka_126
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   parkovka_128:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/parkovka_128
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   parkovka_128_2:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/parkovka_128_2
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
 
   parkovka_2_130:
     ffmpeg:
       inputs:
         - path: rtsp://host.docker.internal:8554/parkovka_2_130
           input_args: preset-rtsp-restream
-          roles:
-            - detect
+          
