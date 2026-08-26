@@ -90,4 +90,4 @@ cameras:
       inputs:
         - path: rtsp://host.docker.internal:8554/parkovka_2_130
           input_args: preset-rtsp-restream
-          
+version: 0.17-0
