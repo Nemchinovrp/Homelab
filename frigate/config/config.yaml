@@ -90,4 +90,53 @@ cameras:
       inputs:
         - path: rtsp://host.docker.internal:8554/parkovka_2_130
           input_args: preset-rtsp-restream
+          
+  dsi_173481138:
+    ffmpeg:
+      inputs:
+        - path: rtsp://host.docker.internal:8554/dsi_173481138
+          input_args: preset-rtsp-restream
+          
+
+  dsi_173547486:
+    ffmpeg:
+      inputs:
+        - path: rtsp://host.docker.internal:8554/dsi_173547486
+          input_args: preset-rtsp-restream
+          
+
+  dsi_173588244:
+    ffmpeg:
+      inputs:
+        - path: rtsp://host.docker.internal:8554/dsi_173588244
+          input_args: preset-rtsp-restream
+          
+
+  dsi_173588440:
+    ffmpeg:
+      inputs:
+        - path: rtsp://host.docker.internal:8554/dsi_173588440
+          input_args: preset-rtsp-restream
+          
+
+  dsi_173588496:
+    ffmpeg:
+      inputs:
+        - path: rtsp://host.docker.internal:8554/dsi_173588496
+          input_args: preset-rtsp-restream
+          
+
+  dsi_173588798:
+    ffmpeg:
+      inputs:
+        - path: rtsp://host.docker.internal:8554/dsi_173588798
+          input_args: preset-rtsp-restream
+          
+
+  dsi_173588876:
+    ffmpeg:
+      inputs:
+        - path: rtsp://host.docker.internal:8554/dsi_173588876
+          input_args: preset-rtsp-restream
+          
 version: 0.17-0
