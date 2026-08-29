@@ -27,3 +27,6 @@ Copy → Copy as cURL
 -------------------------------------
 файл .dsi.env для куки
 файл .env для токенов
+
+sudo chown roman:roman .env
+sudo chmod 600 .env
