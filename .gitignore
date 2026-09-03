@@ -40,3 +40,15 @@ media_server/config/prowlarr
 media_server/config/radarr
 media_server/config/sonarr
 go2rtc/refresh-dsi.log
+jellyfin/jellyfin/cache/.jellyfin-cache
+jellyfin/jellyfin/cache/images/
+jellyfin/jellyfin/cache/imagesbyname/
+jellyfin/jellyfin/cache/omdb/
+jellyfin/jellyfin/cache/transcodes/
+jellyfin/jellyfin/config/.jellyfin-data
+jellyfin/jellyfin/config/config/
+jellyfin/jellyfin/config/data/
+jellyfin/jellyfin/config/log/
+jellyfin/jellyfin/config/metadata/
+jellyfin/jellyfin/config/plugins/
+jellyfin/jellyfin/config/root/
