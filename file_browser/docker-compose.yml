@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    user: "0:0" # Запуск от root, чтобы иметь доступ ко всей файловой системе
+    privileged: true
+    ports:
+      - "9341:80"
+    volumes:
+      - /:/srv # Монтирует весь корень Ubuntu в /srv внутри веб-интерфейса
+      - ./filebrowser.db:/database/filebrowser.db
+      - ./settings.json:/config/settings.json
+    restart: unless-stopped
