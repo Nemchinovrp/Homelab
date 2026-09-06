@@ -4,6 +4,8 @@ set -euo pipefail
 
 export PATH="/opt/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:${PATH:-}"
 
+# Каталог, в котором находится сам скрипт.
+# Благодаря этому работает и на macOS, и на Linux.
 PROJECT_DIR="$(
   cd "$(dirname "${BASH_SOURCE[0]}")" &&
   pwd
@@ -12,8 +14,10 @@ PROJECT_DIR="$(
 ENV_FILE="$PROJECT_DIR/.env"
 SECRET_FILE="$PROJECT_DIR/.dsi.env"
 LOCK_DIR="$PROJECT_DIR/.refresh-dsi.lock"
+DSI_CA_BUNDLE="$PROJECT_DIR/config/certs/dsi-ca-bundle.pem"
 
-# Формат: camera_id|переменная_в_env|referer
+# Формат:
+# camera_id|переменная_в_env|referer
 CAMERAS=(
   "18894|DSI_173481138_URL|https://video.dsi.ru/account/camera/18894/view.html?backPage=5"
   "18882|DSI_173547486_URL|https://video.dsi.ru/account/view.html?page=4"
@@ -27,8 +31,8 @@ CAMERAS=(
 TEMPORARY_FILE=""
 CURL_HLS_TLS_ARGS=()
 
-# DSI использует устаревший короткий DH-ключ. Linux curl с OpenSSL
-# требует SECLEVEL=1. Системный curl macOS этот синтаксис не поддерживает.
+# Видеосерверы DSI используют короткий устаревший DH-ключ.
+# На Linux с OpenSSL разрешаем его через SECLEVEL=1.
 if [[ "$(uname -s)" == "Linux" ]]; then
   CURL_HLS_TLS_ARGS=(
     --tls-max 1.2
@@ -50,18 +54,23 @@ trap cleanup EXIT INT TERM
 
 cd "$PROJECT_DIR"
 
+# Запрещаем параллельный запуск нескольких копий скрипта.
 if [[ -d "$LOCK_DIR" ]]; then
   echo "Обновление уже выполняется или осталась старая блокировка:"
   echo "$LOCK_DIR"
+  echo
+  echo "Если скрипт точно не запущен, удали блокировку:"
+  echo "rmdir '$LOCK_DIR'"
   exit 0
 fi
 
 if ! mkdir "$LOCK_DIR"; then
   echo "Не удалось создать блокировку: $LOCK_DIR"
-  echo "Проверь владельца и права папки: $PROJECT_DIR"
+  echo "Проверь владельца и права каталога: $PROJECT_DIR"
   exit 1
 fi
 
+# Проверяем необходимые программы.
 for command_name in curl jq awk sed grep docker uname; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
     echo "Не найдена команда: $command_name"
@@ -84,6 +93,18 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$DSI_CA_BUNDLE" ]]; then
+  echo "Не найден файл сертификатов:"
+  echo "$DSI_CA_BUNDLE"
+  exit 1
+fi
+
+if [[ ! -r "$DSI_CA_BUNDLE" ]]; then
+  echo "Нет прав на чтение файла сертификатов:"
+  echo "$DSI_CA_BUNDLE"
+  exit 1
+fi
+
 # shellcheck disable=SC1090
 source "$SECRET_FILE"
 
@@ -98,6 +119,7 @@ HLS_URLS=()
 get_hls_url() {
   local camera_id="$1"
   local referer="$2"
+
   local cache_buster
   local response
   local rtsp_url
@@ -106,8 +128,13 @@ get_hls_url() {
 
   cache_buster="$(date +%s)000"
 
-  response="$(
-    curl --fail --silent --show-error \
+  # Получаем свежую временную ссылку камеры.
+  if ! response="$(
+    curl \
+      --fail \
+      --silent \
+      --show-error \
+      --cacert "$DSI_CA_BUNDLE" \
       --get \
       --url "https://video.dsi.ru/account/camera/${camera_id}/url.html" \
       --data-urlencode 'time=' \
@@ -119,14 +146,17 @@ get_hls_url() {
       -H 'User-Agent: Mozilla/5.0' \
       -H 'X-Requested-With: XMLHttpRequest' \
       -b "$DSI_COOKIE"
-  )"
+  )"; then
+    echo "Камера ${camera_id}: не удалось получить ссылку от DSI" >&2
+    return 1
+  fi
 
   if ! printf '%s' "$response" | jq -e . >/dev/null 2>&1; then
     echo "Камера ${camera_id}: сервер вернул не JSON" >&2
     return 1
   fi
 
-  rtsp_url="$(
+  if ! rtsp_url="$(
     printf '%s' "$response" |
       jq -er '
         select(.Error == false and .Status == true)
@@ -134,12 +164,18 @@ get_hls_url() {
         | .URL
       ' |
       tr -d '\r\n'
-  )"
+  )"; then
+    echo "Камера ${camera_id}: DSI не вернул действующую ссылку" >&2
+    return 1
+  fi
 
+  # API называет ссылку /rtsp/, но для HLS нужен путь /hls/
+  # и файл playlist.m3u8.
   hls_url="$(
     printf '%s' "$rtsp_url" |
       sed 's|/rtsp/|/hls/|'
   )"
+
   hls_url="${hls_url%/}/playlist.m3u8"
 
   if [[ ! "$hls_url" =~ ^https://[^/:]+:[0-9]+/hls/.+/playlist\.m3u8$ ]]; then
@@ -147,15 +183,24 @@ get_hls_url() {
     return 1
   fi
 
-  playlist="$(
-    curl --fail --silent --show-error --http1.1 \
+  # Проверяем, что ссылка действительно возвращает HLS-плейлист.
+  if ! playlist="$(
+    curl \
+      --fail \
+      --silent \
+      --show-error \
+      --http1.1 \
+      --cacert "$DSI_CA_BUNDLE" \
       "${CURL_HLS_TLS_ARGS[@]}" \
       --url "$hls_url" \
       -H 'Accept: */*' \
       -H 'Origin: https://video.dsi.ru' \
       -H 'Referer: https://video.dsi.ru/' \
       -H 'User-Agent: Mozilla/5.0'
-  )"
+  )"; then
+    echo "Камера ${camera_id}: не удалось загрузить HLS-плейлист" >&2
+    return 1
+  fi
 
   if ! printf '%s\n' "$playlist" | grep -q '^#EXTM3U'; then
     echo "Камера ${camera_id}: получен некорректный HLS-плейлист" >&2
@@ -174,7 +219,9 @@ update_env_variable() {
   awk \
     -v key="$variable_name" \
     -v value="$variable_value" '
-      BEGIN { found = 0 }
+      BEGIN {
+        found = 0
+      }
 
       index($0, key "=") == 1 {
         print key "=" value
@@ -182,7 +229,9 @@ update_env_variable() {
         next
       }
 
-      { print }
+      {
+        print
+      }
 
       END {
         if (!found) {
@@ -198,16 +247,21 @@ update_env_variable() {
 
 echo "Получаю свежие ссылки для ${#CAMERAS[@]} камер..."
 
-# Сначала получаем и проверяем все ссылки. Если одна проверка завершится
-# ошибкой, .env останется без изменений.
+# Сначала получаем и проверяем ссылки всех камер.
+# Если хотя бы одна камера недоступна, .env не изменяется.
 for camera_config in "${CAMERAS[@]}"; do
   IFS='|' read -r camera_id variable_name referer <<< "$camera_config"
 
   echo "Проверяю камеру ${camera_id}..."
-  hls_url="$(get_hls_url "$camera_id" "$referer")"
+
+  if ! hls_url="$(get_hls_url "$camera_id" "$referer")"; then
+    echo "Обновление остановлено. Файл .env не изменён."
+    exit 1
+  fi
 
   VARIABLE_NAMES+=("$variable_name")
   HLS_URLS+=("$hls_url")
+
   echo "Камера ${camera_id}: ссылка получена и проверена"
 done
 
@@ -238,5 +292,10 @@ if [[ "$changed" -eq 0 ]]; then
 fi
 
 echo "Пересоздаю контейнер go2rtc..."
-docker compose up -d --force-recreate go2rtc
+
+if ! docker compose up -d --force-recreate go2rtc; then
+  echo "Ссылки обновлены, но контейнер go2rtc не удалось перезапустить"
+  exit 1
+fi
+
 echo "Готово: ссылки обновлены, go2rtc перезапущен"
