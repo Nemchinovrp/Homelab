@@ -52,4 +52,6 @@ jellyfin/jellyfin/config/log/
 jellyfin/jellyfin/config/metadata/
 jellyfin/jellyfin/config/plugins/
 jellyfin/jellyfin/config/root/
-vuetorrent/config/qBittorrent
+vuetorrent/config/qBittorrent/
+go2rtc/config/certs/
+vuetorrent/config/qBittorrent/qBittorrent.conf
