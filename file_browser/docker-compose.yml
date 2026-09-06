@@ -6,7 +6,7 @@ services:
     user: "0:0" # Запуск от root, чтобы иметь доступ ко всей файловой системе
     privileged: true
     ports:
-      - "9341:80"
+      - "8080:80"
     volumes:
       - /:/srv # Монтирует весь корень Ubuntu в /srv внутри веб-интерфейса
       - ./filebrowser.db:/database/filebrowser.db
