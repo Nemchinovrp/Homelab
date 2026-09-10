@@ -1,0 +1,19 @@
+services:
+  filebrowser:
+    image: gtstef/filebrowser:stable
+    container_name: filebrowser
+    restart: unless-stopped
+
+    # Нужен root, иначе многие системные каталоги Ubuntu
+    # будут недоступны из-за Unix permissions
+    user: "0:0"
+
+    ports:
+      - "5163:80"
+
+    volumes:
+      # Вся файловая система Ubuntu
+      - /:/host
+
+      # Конфигурация/БД FileBrowser отдельно
+      - ./data:/home/filebrowser/data
